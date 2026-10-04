@@ -7,8 +7,10 @@ from mcp.server.fastmcp import FastMCP
 # Render will provide the port via PORT environment variable (default: 10000)
 port = int(os.environ.get("PORT", 10000))
 
-# Initialize FastMCP server listening on 0.0.0.0
-mcp = FastMCP("gimkit-formatter", host="0.0.0.0", port=port)
+# Initialize FastMCP server
+mcp = FastMCP("gimkit-formatter")
+mcp.settings.host = "0.0.0.0"
+mcp.settings.port = port
 
 @mcp.tool()
 def format_to_gimkit_csv(questions_json: str) -> str:
