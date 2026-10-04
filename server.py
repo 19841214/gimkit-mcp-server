@@ -3,6 +3,7 @@ import io
 import json
 import os
 from mcp.server.fastmcp import FastMCP
+from starlette.responses import JSONResponse
 
 # Render will provide the port via PORT environment variable (default: 10000)
 port = int(os.environ.get("PORT", 10000))
@@ -11,6 +12,20 @@ port = int(os.environ.get("PORT", 10000))
 mcp = FastMCP("gimkit-formatter")
 mcp.settings.host = "0.0.0.0"
 mcp.settings.port = port
+
+# Add healthcheck and root routes so external pingers (like Google) get 200 OK instead of 404
+@mcp.custom_route("/", methods=["GET", "HEAD"])
+async def root(request):
+    return JSONResponse({
+        "status": "ok",
+        "name": "gimkit-formatter",
+        "mcp_endpoint": "/sse",
+        "message": "Gimkit MCP Server is running."
+    })
+
+@mcp.custom_route("/health", methods=["GET", "HEAD"])
+async def health(request):
+    return JSONResponse({"status": "healthy"})
 
 @mcp.tool()
 def format_to_gimkit_csv(questions_json: str) -> str:
